@@ -1,0 +1,76 @@
+/* Интерфейс без библиотек. Сайт работает и через Live Server, и на GitHub Pages. */
+(() => {
+  'use strict';
+  const data = window.ECO;
+  const $ = (s, root = document) => root.querySelector(s);
+  const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const paths = {
+    leaf:'M20 4C9 2 3 7 5 15c2 7 14 6 15-11ZM5 20 16 9',
+    home:'m3 11 9-8 9 8M5 10v11h14V10M9 21v-7h6v7',
+    wind:'M3 8h12c5 0 5-6 1-6M3 12h16c4 0 4 6 0 6M3 16h7c4 0 4 6 0 6',
+    water:'M12 2s-7 8-7 13a7 7 0 0 0 14 0c0-5-7-13-7-13ZM8 15a4 4 0 0 0 4 4',
+    recycle:'m8 6 3-4 4 6M11 2l4 6 3-1M18 10l4 6-4 5M22 16h-8l1-3M10 20H3l-2-6M3 20l4-7-3-1',
+    phone:'M7 3H3v4c0 8 6 14 14 14h4v-4l-6-2-2 2c-3-1-5-3-6-6l2-2-2-6Z',
+    pin:'M19 9c0 6-7 13-7 13S5 15 5 9a7 7 0 1 1 14 0ZM15 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+    search:'M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Zm-2 5 6 6',
+    alert:'m12 3 10 18H2L12 3Zm0 6v5m0 3v1',
+    check:'m5 12 4 4L19 6',
+    book:'M12 5C8 2 3 3 2 4v16c4-2 7-1 10 1 3-2 6-3 10-1V4c-1-1-6-2-10 1Zm0 0v16',
+    edit:'M15 4 20 9M3 21l5-1L21 7l-5-5L3 15v6ZM13 21h9',
+    shield:'m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4Zm-5 9 3 3 6-6',
+    globe:'M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM2 12h20M12 2c5 5 5 15 0 20-5-5-5-15 0-20'
+  };
+  const icon = name => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name] || paths.leaf}"/></svg>`;
+  const page = document.body.dataset.page;
+  const nav = [['index.html','Главная','home'],['situations.html','Ситуации','situations'],['contacts.html','Куда обратиться','contacts'],['about.html','О проекте','about']];
+  const brand = `<a class="brand" href="index.html" aria-label="ЭкоНавигатор — главная"><img src="assets/favicon.svg" alt="" width="36" height="36"><span>эко<span>навигатор</span></span></a>`;
+  $('#site-header').innerHTML = `<div class="wrap nav-inner">${brand}<nav class="nav-links" id="navigation" aria-label="Основная навигация">${nav.map(([href,text,key])=>`<a href="${href}" ${page===key?'aria-current="page"':''}>${text}</a>`).join('')}<a href="appeal.html" ${page==='appeal'?'aria-current="page"':''}>Обращение</a></nav><a class="nav-call" href="tel:112" aria-label="Позвонить 112 при угрозе жизни или здоровью">${icon('phone')}112</a><button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="navigation"><span></span><span></span></button></div>`;
+  $('#site-footer').innerHTML = `<div class="wrap"><div class="footer-main"><div class="footer-about">${brand}<p>Понятные действия.<br>Бережное отношение к природе.<br>Липецкая область.</p></div><div><h3>Навигация</h3><div class="footer-links">${nav.map(([h,t])=>`<a href="${h}">${t}</a>`).join('')}<a href="appeal.html">Подготовить обращение</a></div></div><div><h3>Если нужна помощь</h3><div class="footer-links"><a href="tel:112">112 — экстренные службы</a><a href="contacts.html">Организации и контакты</a><a href="about.html#sources">Источники информации</a></div><p>Учебный информационный проект.<br>При опасности обращайтесь в экстренные службы.</p></div></div><div class="footer-bottom"><span>© 2027 Бабаджанян Владимир. Все права защищены.</span><span>Создано с заботой о родном крае</span></div></div>`;
+  const emergency = `<div class="wrap"><span class="warning-symbol">${icon('alert')}</span><p><strong>Если есть угроза жизни или здоровью — звоните 112.</strong>Не откладывайте вызов помощи ради чтения инструкции.</p><a class="call" href="tel:112">${icon('phone')}Позвонить 112</a></div>`;
+  document.querySelectorAll('.emergency').forEach(el => el.innerHTML = emergency);
+  document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
+  const burger = $('.burger'), navigation = $('#navigation');
+  function menu(open) {burger.setAttribute('aria-expanded',String(open));burger.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню');navigation.classList.toggle('open',open);document.body.classList.toggle('menu-open',open);if(open)navigation.querySelector('a').focus();}
+  burger.addEventListener('click',()=>menu(burger.getAttribute('aria-expanded')!=='true'));
+  navigation.addEventListener('click',e=>{if(e.target.closest('a'))menu(false);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&burger.getAttribute('aria-expanded')==='true'){menu(false);burger.focus();}});
+  document.addEventListener('click',e=>{if(!e.target.closest('.site-header')&&burger.getAttribute('aria-expanded')==='true')menu(false);});
+  matchMedia('(min-width:781px)').addEventListener('change',e=>{if(e.matches)menu(false);});
+  document.addEventListener('keydown',e=>{if(e.key!=='Tab'||burger.getAttribute('aria-expanded')!=='true')return;const items=[...navigation.querySelectorAll('a'),$('.nav-call'),burger],first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+  const cat = id => data.categories.find(c=>c.id===id);
+  function card(s){return `<a class="situation-card reveal" href="situation.html?id=${s.id}"><div class="card-top">${icon(cat(s.category).icon)}<span class="pill ${s.urgent?'urgent':'soft'}">${s.urgent?'Возможна опасность':cat(s.category).name}</span></div><h3>${s.title}</h3><p>${s.description}</p><div class="card-bottom"><span>Открыть инструкцию</span><span class="card-open" aria-hidden="true">+</span></div></a>`;}
+  function contact(key){const o=data.organizations[key];return `<article class="contact-box"><span class="eyebrow">Куда обратиться</span><h3>${o.name}</h3><p>${o.purpose}</p><a class="contact-link" href="tel:${o.tel}">${icon('phone')}<span>${o.phone}<small>Нажмите, чтобы позвонить</small></span></a><a class="contact-link" href="https://yandex.ru/maps/?text=${encodeURIComponent(o.address)}" target="_blank" rel="noopener noreferrer">${icon('pin')}<span>${o.address}<small>Открыть в Яндекс Картах · новая вкладка</small></span></a><p>${o.addressType}.<br><strong>Территория:</strong> ${o.scope}.</p><a class="source-link" href="${o.url}" target="_blank" rel="noopener noreferrer">Официальный источник контакта</a>${o.addressSource?`<br><a class="source-link" href="${o.addressSource}" target="_blank" rel="noopener noreferrer">Источник адреса подразделения</a>`:''}</article>`;}
+  if(page==='home'){
+    $('#category-grid').innerHTML=data.categories.map(c=>`<a class="category-tile" href="situations.html?category=${c.id}">${icon(c.icon)}<h3>${c.name}</h3><small>${data.situations.filter(s=>s.category===c.id).length} ситуаций</small></a>`).join('');
+    $('#popular-grid').innerHTML=['mercury','chemical-smell','dump'].map(id=>card(data.situations.find(s=>s.id===id))).join('');
+    $('#hero-search').addEventListener('submit',e=>{e.preventDefault();location.href='situations.html?q='+encodeURIComponent($('#hero-query').value.trim());});
+  }
+  if(page==='situations'){
+    const params=new URLSearchParams(location.search);let selected=cat(params.get('category'))?params.get('category'):'all';
+    $('#search').value=params.get('q')||'';
+    $('#filters').innerHTML=[{id:'all',name:'Все ситуации'},...data.categories].map(c=>`<button class="filter" data-category="${c.id}" aria-pressed="${c.id===selected}">${c.name}</button>`).join('');
+    const normalize=s=>s.toLowerCase().replaceAll('ё','е').trim();
+    function render(){const query=normalize($('#search').value),words=query.split(/\s+/).filter(Boolean);const visible=data.situations.filter(s=>(selected==='all'||s.category===selected)&&words.every(w=>normalize(s.title+' '+s.description+' '+s.keywords).includes(w)));$('#catalog-grid').innerHTML=visible.length?visible.map(card).join(''):`<div class="empty-state"><h2>Пока ничего не нашлось</h2><p>Попробуйте другое слово или выберите все категории.</p><button class="btn" id="reset-search">Сбросить поиск</button></div>`;$('#result-count').textContent=`Найдено: ${visible.length} из ${data.situations.length}`;$('#clear-search').hidden=!$('#search').value;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.category===selected)));const next=new URLSearchParams();if(query)next.set('q',$('#search').value);if(selected!=='all')next.set('category',selected);history.replaceState(null,'',location.pathname+(next.size?'?'+next:''));$('#reset-search')?.addEventListener('click',()=>{selected='all';$('#search').value='';render();$('#search').focus();});}
+    $('#search').addEventListener('input',render);$('#clear-search').addEventListener('click',()=>{$('#search').value='';render();$('#search').focus();});$('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){selected=b.dataset.category;render();}});render();
+  }
+  if(page==='situation'){
+    const s=data.situations.find(s=>s.id===new URLSearchParams(location.search).get('id'));
+    if(!s){$('#detail-root').innerHTML='<div class="wrap section"><h1>Ситуация не найдена</h1><p>Выберите инструкцию из каталога.</p><a class="btn" href="situations.html">Все ситуации</a></div>';document.title='Ситуация не найдена — ЭкоНавигатор';}
+    else {document.title=s.title+' — ЭкоНавигатор';$('#detail-root').innerHTML=`<div class="wrap page-head detail-head"><div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><a href="situations.html?category=${s.category}">${cat(s.category).name}</a></div><span class="eyebrow">Инструкция · Липецкая область</span><h1>${s.title}</h1><p>${s.description}</p></div><div class="wrap detail-layout"><div class="detail-main"><section class="instruction"><h2>Что сделать в первую очередь</h2><ol class="instruction-list">${s.steps.map(t=>`<li>${t}</li>`).join('')}</ol>${s.extraPhone?`<a class="btn" href="tel:${s.extraPhone}">Позвонить ${s.extraPhone}</a>`:''}</section><section class="do-not"><h2>Чего нельзя делать</h2><ul>${s.avoid.map(t=>`<li>${t}</li>`).join('')}</ul></section><section class="question-panel"><h2>${s.waste?'Предмет повреждён или протекает?':'Есть непосредственная угроза людям?'}</h2><p class="muted">Необязательное уточнение. Первые действия доступны выше.</p><div class="question-options">${['Да','Нет','Не знаю'].map((v,i)=>`<button data-answer="${i}" aria-pressed="false">${v}</button>`).join('')}</div><div class="answer" id="answer" aria-live="polite" hidden></div></section><section class="instruction"><h2>Что сообщить</h2><p>${s.message}</p><p class="muted">Опишите только то, что наблюдали. Фотографируйте, если это не создаёт опасности.</p><a class="btn" href="appeal.html?situation=${s.id}">${icon('edit')}Подготовить обращение</a></section><section><h2>Источники и пояснения</h2><ul class="source-list">${s.sources.map(k=>`<li><a href="${data.sources[k][1]}" target="_blank" rel="noopener noreferrer">${data.sources[k][0]}</a></li>`).join('')}</ul></section></div><aside class="contact-sidebar">${contact(s.org)}${s.waste?'<p class="side-note">Контакт ведомства — для уточнения порядка обращения и компетенции. Отходы сюда привозить не нужно. Конкретный пункт приёма и перечень отходов заранее подтвердите у оператора.</p>':''}<a class="btn outline" href="situations.html">Все ситуации</a></aside></div>`;
+      document.querySelector('.question-options').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('[data-answer]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));const answers=s.waste?['Не перевозите повреждённый предмет без указаний специалиста. При нагреве, дыме, утечке или угрозе здоровью отойдите и звоните 112.','Заранее согласуйте с оператором вид отходов, упаковку и время приёма. Адрес ведомства не является пунктом сбора.','Не вскрывайте предмет для проверки. Опишите его состояние оператору и уточните безопасный порядок передачи.']:['Сначала звоните 112 из безопасного места. Выполняйте указания диспетчера. Подготовка обращения может подождать.','Следуйте первичной инструкции. Для несрочного сообщения используйте профильную организацию и опишите факты. Ответ «нет» не подтверждает безопасность ситуации.','Не приближайтесь к возможному источнику опасности. Если подозреваете угрозу людям, звоните 112 и опишите наблюдаемое.'];$('#answer').hidden=false;$('#answer').textContent=answers[Number(b.dataset.answer)];});
+    }
+  }
+  if(page==='contacts')$('#contacts-grid').innerHTML=Object.keys(data.organizations).map(contact).join('');
+  if(page==='about')$('#all-sources').innerHTML=Object.values(data.sources).map(([title,url])=>`<li><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></li>`).join('');
+  if(page==='appeal'){
+    const select=$('#situation-select');select.innerHTML='<option value="">Выберите ситуацию</option>'+data.situations.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+    const initial=new URLSearchParams(location.search).get('situation');if(data.situations.some(s=>s.id===initial))select.value=initial;
+    let lastDraft='';const status=$('#form-status');
+    function invalidate(){if(lastDraft){status.textContent='Данные изменены. Составьте черновик заново.';$('#draft-actions').hidden=true;$('#draft').value='';lastDraft='';}}
+    $('#appeal-form').addEventListener('input',invalidate);
+    $('#appeal-form').addEventListener('submit',e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;const s=data.situations.find(s=>s.id===select.value);const place=$('#place').value.trim(),facts=$('#facts').value.trim();if(!place||!facts){status.textContent='Укажите место и наблюдаемые обстоятельства.';return;}const when=$('#when').value.trim()||'точное время не установлено';const recipient=data.organizations[s.org];lastDraft=`В ${recipient.name}\n\nСообщение по ситуации «${s.title}»\n\nМесто: ${place}.\nДата и время наблюдения: ${when}.\n\nОбстоятельства:\n${facts}\n\nПрошу рассмотреть сообщение в пределах компетенции и сообщить о результатах рассмотрения.\n\nПеред подачей: проверьте адресата и факты, укажите сведения о заявителе и способе получения ответа, которые требует официальный сервис. При необходимости приложите фотографии.\n\nДата составления: ${new Date().toLocaleDateString('ru-RU')}.`;$('#draft').value=lastDraft;$('#draft-result').hidden=false;$('#draft-empty').hidden=true;$('#draft-actions').hidden=false;$('#official-submit').href=recipient.url;status.textContent='Черновик готов. Он никуда не отправлен.';$('#draft').focus();});
+    $('#copy-draft').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#draft').value);status.textContent='Текст скопирован.';}catch{ $('#draft').focus();$('#draft').select();status.textContent='Текст выделен. Скопируйте его вручную через меню или Ctrl+C.';}});
+    $('#download-draft').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob(['\uFEFF'+$('#draft').value],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Обращение-ЭкоНавигатор.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='Файл подготовлен для сохранения.';});
+    $('#appeal-form').addEventListener('reset',()=>{lastDraft='';$('#draft').value='';$('#draft-result').hidden=true;$('#draft-empty').hidden=false;$('#draft-actions').hidden=true;status.textContent='Форма очищена.';});
+  }
+})();
